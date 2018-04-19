@@ -1,0 +1,48 @@
+#include<stdio.h>
+#include "NUC1xx.h"
+#include "Driver\DrvGPIO.h"
+#include "Driver\DrvSYS.h"
+#include "Driver\DrvUART.h"
+#include "LCD_Driver.h"
+
+volatile uint32_t irqA_counter=0;
+
+void GPIOAB_INT_Callback(uint32_t GPA_IntStatus,uint32_t GPB_IntStatus){
+	char text[16];
+	int32_t a;
+	
+	DrvGPIO_SetPortBits(E_GPA,0);
+	a=DrvGPIO_GetPortBits(E_GPA);
+	
+	if(GPA_IntStatus>>15 & 0x01) irqA_counter++;
+	
+	sprintf(text,"Port bits: %d",a);
+	print_lcd(2,text);
+	print_lcd(3,"GPA Interrupt");
+}
+
+int32_t main(){
+	char text[16];
+	
+	UNLOCKREG();
+	SYSCLK->PWRCON.XTL12M_EN = 1; //Enable 12Mhz and set HCLK-&gt;12Mhz
+	DrvSYS_Delay(1000);
+	SYSCLK->CLKSEL0.HCLK_S = 0;
+	LOCKREG();
+	
+	DrvGPIO_Open(E_GPA,15,E_IO_INPUT);
+	DrvGPIO_EnableInt(E_GPA,15,E_IO_RISING,E_MODE_EDGE);
+	DrvGPIO_SetDebounceTime(5,1);
+	DrvGPIO_EnableDebounce(E_GPA,15);
+	DrvGPIO_SetIntCallback(GPIOAB_INT_Callback,NULL);
+	
+	Initial_panel();
+	clr_all_panel();
+	
+	print_lcd(0,"heading");
+	
+	while(1){
+		sprintf(text,"irqA counter: %d",irqA_counter);
+		print_lcd(1,text);
+	}
+}
