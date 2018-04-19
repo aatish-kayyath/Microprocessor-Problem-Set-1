@@ -1,0 +1,42 @@
+#include<stdio.h>
+#include "NUC1xx.h"
+#include "Driver\DrvGPIO.h"
+#include "Driver\DrvSYS.h"
+#include "Driver\DrvUART.h"
+#include "Driver\DrvADC.h"
+#include "LCD_Driver.h"
+
+#define d2 51
+#define d360 512
+#define d180 512/2
+#define d90 512/4
+#define d45 512/8
+
+unsigned char CW[8]={0x09,0x01,0x03,0x02,0x06,0x04,0x0c,0x08};
+unsigned char CCW[8]={0x08,0x0c,0x04,0x06,0x02,0x03,0x01,0x09};
+
+void CW_MOTOR(uint16_t deg){
+	int i=0, j=0;
+	for(j=0;j<deg;j++){
+		for(i=0;i<8;i++){
+			GPIOA->DOUT=CW[i];
+			DrvSYS_Delay(1000);
+		}
+	}
+}
+
+void CCW_MOTOR(uint16_t deg){
+	int i=0, j=0;
+	for(j=0;j<deg;j++){
+		for(i=0;i<8;i++
+		){
+			GPIOA->DOUT=CCW[i];
+			DrvSYS_Delay(1000);
+		}
+	}
+}
+int main(){
+	CW_MOTOR(d2);
+	CCW_MOTOR(d2/2);
+}
+
