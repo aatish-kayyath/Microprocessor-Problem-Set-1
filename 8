@@ -1,0 +1,24 @@
+ #include<stdio.h>
+#include "NUC1xx.h"
+#include "Driver\DrvGPIO.h"
+#include "Driver\DrvSYS.h"
+#include "Driver\DrvUART.h"
+#include "Driver\DrvADC.h"
+
+void EINT1Callback(){
+	DrvGPIO_ClrBit(E_GPA,0);
+	DrvSYS_Delay(1000);
+}
+int main(){
+	UNLOCKREG();
+	DrvSYS_SetOscCtrl(E_SYS_XTL12M,1);
+	DrvSYS_SelectHCLKSource(0);
+	LOCKREG();
+	
+	DrvGPIO_Open(E_GPA,0,E_IO_OUTPUT);
+	DrvGPIO_Open(E_GPB,15,E_IO_INPUT);
+	DrvGPIO_EnableEINT1(E_IO_BOTH_EDGE, E_MODE_EDGE, EINT1Callback);
+	while(1){
+	}
+}
+
